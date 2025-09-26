@@ -1,0 +1,5 @@
+feature,median_healthy,median_PD,p_value,rank_biserial,effect_magnitude_rb,Cohen_d,required_n_per_group
+spread1,-6.8264,-5.44,1.59e-16,0.794,large,1.732,7
+PPE,0.1151,0.2227,1.59e-16,0.794,large,1.642,7
+MDVP:APQ,0.013,0.0216,1.27e-11,0.652,large,1.095,15
+MDVP:Jitter(Abs),0.0,0.0,1.28e-09,0.578,large,0.972,18
