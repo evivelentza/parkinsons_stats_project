@@ -1,72 +1,99 @@
-# 🧠 Parkinson's Disease Statistics Project
+# Statistical Analysis of the Parkinson’s Voice Dataset  
 
-## 📖 Overview
-This project performs a statistical analysis of the [UCI Parkinson's dataset](https://archive.ics.uci.edu/ml/datasets/parkinsons).  
-The goal is to explore differences in **voice features** between Parkinson's patients and healthy controls,  
-using descriptive statistics, hypothesis testing, and regression analysis.  
+## 📖 Project Overview  
+This project applies a **5-step statistical analysis workflow** to the [UCI Parkinson’s Voice Dataset](https://archive.ics.uci.edu/ml/datasets/parkinsons).  
+The dataset contains **22 voice features** extracted from sustained phonation recordings, along with a **status label** (1 = Parkinson’s Disease, 0 = healthy).  
 
-The analysis focuses on **clinically interpretable voice measures**—such as jitter, shimmer, and harmonic-to-noise ratio (HNR)—that are commonly associated with dysphonia in Parkinson’s disease.
-
----
-
-## 📊 Dataset
-- **Source:** UCI Machine Learning Repository  
-- **Citation:**  
-  If you use this dataset, please cite:  
-  *Little MA, McSharry PE, Roberts SJ, Costello DAE, Moroz IM (2007).*  
-  *"Exploiting Nonlinear Recurrence and Fractal Scaling Properties for Voice Disorder Detection."*  
-  *BioMedical Engineering OnLine, 6:23 (26 June 2007).*  
-
-- **File:** `parkinsons.csv`  
-- **Samples:** 195 voice recordings (31 subjects, 23 with Parkinson’s disease)  
-- **Features:** 22 biomedical voice measures (e.g., jitter, shimmer, HNR)  
-- **Target:** `status` (1 = Parkinson’s, 0 = Healthy)
+The goal:  
+- Explore how acoustic features differ between PD and controls  
+- Identify **potential biomarkers** for diagnosis  
+- Demonstrate statistical and machine learning techniques in a health data context  
 
 ---
 
-## ⚙️ Methods
-- **Descriptive Statistics**: mean, SD, median, IQR  
-- **Hypothesis Testing**: independent-samples t-tests, Cohen’s d effect sizes  
-- **Correlation Analysis**: pairwise feature correlations  
-- **Visualization**: histograms, boxplots, scatterplots (status split)  
-- **Regression (future extension)**: exploring logistic regression and feature importance  
+## 🛠️ Workflow  
+
+### 🔹 Step 1: Descriptive Statistics & Distribution Checks  
+- Explored feature distributions (histograms, boxplots, QQ-plots).  
+- Checked **normality (Shapiro–Wilk)** and **variance equality (Levene’s test)**.  
+- Found that jitter/shimmer are highly skewed, HNR closer to normal.  
+
+📌 Deliverable: Summary of which features are approximately normal vs. skewed.  
 
 ---
 
-## 🔬 Clinically Relevant Features
-- **MDVP:Fo(Hz) – Fundamental Frequency (Pitch)**  
-  Baseline pitch of the voice. In PD, pitch may show reduced range or higher variability, but overlaps strongly with healthy voices. Useful as a context feature when paired with HNR.  
+### 🔹 Step 2: Parametric vs Non-Parametric Testing  
+- Compared PD vs. healthy for each feature.  
+- Chose **Mann–Whitney U** for most (non-normal) features, Welch’s t-test for rare normal ones.  
+- Applied **multiple testing correction** (Benjamini–Hochberg FDR).  
 
-- **MDVP:Jitter(%) – Frequency Instability**  
-  High jitter = irregular vocal fold vibration. PD patients often show **higher jitter** due to tremor and instability.  
-
-- **MDVP:Shimmer – Amplitude Instability**  
-  High shimmer = uneven loudness in the voice. PD patients often show **increased shimmer**, another sign of dysphonia.  
-
-- **HNR (Harmonic-to-Noise Ratio) – Voice Noisiness**  
-  Lower HNR = noisier, breathier voice. PD patients tend to have **significantly lower HNR**, making it a strong, clinically interpretable biomarker.  
+📌 Result: **Spread1, PPE, and MDVP:APQ** emerged as most significant (p_FDR < 1e-9).  
 
 ---
 
-## 🔑 Key Findings
-- **PD patients show increased voice instability**:  
-  Higher values of **jitter** (frequency variation) and **shimmer** (amplitude variation) compared to healthy controls.  
+### 🔹 Step 3: Confidence Intervals & Hypothesis Testing  
+- Computed **bootstrap 95% confidence intervals** for medians.  
+- Confirmed significant differences (Mann–Whitney p-values).  
+- Quantified effect sizes (rank-biserial correlations).  
 
-- **PD patients show reduced voice quality**:  
-  Lower **Harmonic-to-Noise Ratio (HNR)**, indicating noisier, breathier voices.  
-
-- **Fundamental frequency (Fo)** alone is less discriminative:  
-  While pitch overlaps between groups, when paired with HNR it provides useful context for classification.  
-
-- **Clinical interpretation**:  
-  Together, these features provide **clinically interpretable biomarkers** that can support **machine learning models** for Parkinson’s detection.  
+📌 Example:  
+- Spread1: Healthy median -6.83 vs PD -5.44, effect size 0.79 → **very strong difference**.  
 
 ---
 
-## ✅ Requirements
-See `requirements.txt` for the full list of dependencies. Typical stack:  
-```bash
-pandas
-numpy
-matplotlib
-scipy
+### 🔹 Step 4: Effect Sizes, Errors & Power  
+- Calculated **Cohen’s d** for top features (all > 0.9 → very large).  
+- Ran **power analysis** (statsmodels):  
+  - Only ~6–18 samples per group needed to detect these differences with 80% power.  
+- Discussed **Type I (false positives)** and **Type II (false negatives)** in this context.  
+
+📌 Conclusion: Dataset is more than sufficient to detect clinically meaningful differences.  
+
+---
+
+### 🔹 Step 5: Correlation & Regression  
+
+- **Spearman correlation heatmap** → revealed redundancy (e.g., shimmer/APQ cluster, jitter family, Spread1 ≈ PPE).  
+- **Simple regressions** (e.g., PPE ~ Spread1) showed near-linear dependence (R² ≈ 0.95).  
+- **Logistic regression with VIF pruning**: Spread1, PPE, APQ remain robust predictors.  
+- **Regularization (L1/L2)** confirmed that a small subset of features suffices for high predictive accuracy (AUC ≈ 0.95).  
+
+📌 Deliverable: Odds ratios, ROC curves, and regularized feature selection results.  
+
+---
+
+## 🔑 Key Insights  
+- PD patients show **greater voice irregularity** (jitter, shimmer, APQ) and **nonlinear frequency variation** (Spread1, PPE).  
+- A **compact model with 3–4 features** achieves excellent discrimination (AUC ~0.95).  
+- Confirms known biomarkers while showcasing a reproducible, researcher-style workflow.  
+
+---
+
+## 📂 Repo Structure  
+parkinsons_stats_project/
+│
+├── data/ # Parkinson’s dataset (.csv, .names)
+├── notebooks/ # Jupyter notebook
+├── summary.csv # Final statistical summary tables
+└── README.md # This file
+
+---
+
+## 🧰 Methods & Tools  
+- **Python**: pandas, numpy, scipy, statsmodels, sklearn, seaborn, matplotlib  
+- **Statistics**: Shapiro–Wilk, Levene’s test, Mann–Whitney U, bootstrap CIs, Cohen’s d, power analysis  
+- **ML**: Logistic regression, L1/L2 regularization, ROC/AUC  
+
+---
+
+## 📜 References  
+- Little MA, McSharry PE, Roberts SJ, Costello DAE, Moroz IM.  
+  *Exploiting Nonlinear Recurrence and Fractal Scaling Properties for Voice Disorder Detection*.  
+  BioMedical Engineering OnLine 2007, 6:23.  
+
+- UCI Machine Learning Repository: [Parkinson’s Dataset](https://archive.ics.uci.edu/ml/datasets/parkinsons)  
+
+---
+
+This project demonstrates how to move from **EDA → statistical testing → effect size → regression modeling** in a **healthcare context**.  
+It can serve as a **template for biomarker discovery projects** in biotech, neuroscience, and beyond.  
